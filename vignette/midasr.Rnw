@@ -1,0 +1,241 @@
+\documentclass{article}
+\usepackage{amsbsy,amsfonts,amsmath,amssymb,amsthm}
+\usepackage{array,bm}
+\usepackage{rotating}
+\usepackage{graphicx}
+%\usepackage[mathscr]{eucal}
+\usepackage{lmodern}
+\usepackage{multirow}
+\usepackage{natbib}
+\usepackage{setspace}
+\usepackage{dcolumn}
+
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\title{Mixed frequency data sampling regression models in R}
+
+The mixed data sampling (MIDAS) approach introduced in \cite{ghysels_touch_2002} has gained popularity in financial and some macroeconomic applications (see e.g. \citealp{foroni:2012}, and \citealp{sinko:2012}, for a recent overview of various contributions).
+
+This document describes how this approach is implemented in R. 
+
+The MIDAS regression 
+Set up the data and load all necessary packages
+<<echo=TRUE, results=verbatim>>=
+library(midasr)
+data("USunempr")
+data("USrealgdp")
+y <- diff(log(USrealgdp))
+x <- window(diff(USunempr), start = 1949)
+@
+\begin{thebibliography}{99}
+
+\bibitem[Akaike, 1974]{akaike:1974} Akaike, H. 1974.
+\newblock A new look at the statistical model identification.
+\newblock \emph{IEEE Transactions on Automatic Control} {\bf 19}: 716--723. 
+
+\bibitem[Andersen et al., 2007]{andersen:2007} Andersen TG, Bollerslev T, and Diebold FX. 2007.
+\newblock Roughing It Up: Including Jump Components in the Measurement, Modeling and Forecasting of Return Volatility.
+\newblock \emph{Review of Economics and Statistics} {\bf 89}: 701--720. 
+
+
+\bibitem[Andreou et al., 2010]{andreou:2010} Andreou E, Ghysels E, and Kourtellos A. 2010.
+\newblock Regression models with mixed sampling frequencies.
+\newblock \emph{Journal of Econometrics} {\bf 158}: 246--261. 
+%\newblock {\em Journal of Econometrics}, 158(2):246--261. Oct., 2010.
+
+
+\bibitem[Andrews, 1987]{andrews:1987} Andrews DWK. 1987.
+\newblock Asymptotic results for generalized Wald tests.
+\newblock \emph{Econometric Theory} {\bf 3}: 348358. 
+
+\bibitem[Andrews, 1991]{andrews:1991} Andrews DWK. 1991.
+\newblock Heteroskedasticity and Autocorrelation Consistent Covariance Matrix Estimation.
+\newblock \emph{Econometrica} {\bf 59}: 817--858. 
+%\newblock {\em Journal of Econometrics}, 158(2):246--261. Oct., 2010.
+
+\bibitem[Andrews and Monahan, 1992]{andrews:1992} Andrews DWK and  Monahan JC. 1992.
+\newblock An Improved Heteroskedasticity and Autocorrelation Consistent Covariance Matrix Estimator.
+\newblock \emph{Econometrica} {\bf 60}: 953--966. 
+%\newblock {\em Journal of Econometrics}, 158(2):246--261. Oct., 2010.
+
+
+%\bibitem[Armesto et al., 2010]{armesto_etal_2010} Armesto, M.T., Engemann, K.M. and M.T. Owyang, 2010,
+%\newblock Forecasting with mixed frequencies.
+%\newblock {Federal Reserve Bank of St. Louis Review} 92, 521--536. 
+%\newblock {\em Federal Reserve Bank of St. Louis Review}, 92(6):521--536. Nov./Dec., 2010.
+
+\bibitem[Bai et al., 2010]{bai_state_2010} Bai J, Ghysels E, and Wright JH. 2010.
+\newblock State space models and {MIDAS} regressions. July, 2010.
+\newblock Forthcoming in \emph{Econometric Reviews}.%, ???{\bf[patikrinti]}. 
+%\newblock Forthcoming in {\em Econometric Reviews}. 
+
+%\bibitem[Baltagi, 2011]{baltagi_2011} Baltagi, B.H. 2011,
+%\newblock {Econometrics}.
+%\newblock Springer, $5^{th}$ ed., 2011.
+
+%\bibitem[Berk, 1974]{berk:1974} Berk, K.N. 1974,
+%\newblock Consistent autoregressive spectral estimates.
+%\newblock {The Annals of Statistics} 2, 489--502.
+%\newblock \emph{The Annals of Statistics}, 2(3): 489--502.
+
+%\bibitem[Bhansali, 1978]{bhansali:1978} Bhansali, R.J. 1978,
+%\newblock Linear prediction by autoregressive model fitting in the time domain.
+%\newblock {The Annals of Statistics} 6, 224--231.
+%\newblock \emph{The Annals of Statistics}, 6(1): 224--231.
+
+%\bibitem[Cuaresma, 2003]{Cuaresma:2003} 
+%Cuaresma, J. C. (2003). 'Okun's Law Revisited', \emph{Oxford Bulletin of Economics and Statistics}, Vol. 65, pp. 439-451.
+
+\bibitem[Foroni et al., 2012]{foroni:2012} Foroni C, Marcellino M, and Schumacher C. 2012.
+\newblock U-MIDAS: MIDAS regressions with unrestricted lag polynomials.
+\newblock CEPR Discussion Papers No 8828.
+
+\bibitem[Forsberg and Ghysels, 2007]{forsberg:2007} Forsberg L and Ghysels E. 2012.
+\newblock Why Do Absolute Returns Predict Volatility So Well?
+\newblock \emph{Journal of Financial Econometrics} {\bf 5}: 31-67.
+
+\bibitem[Ghysels et al., 2002]{ghysels_touch_2002} Ghysels E, Santa-Clara P, and Valkanov R. 2002.
+\newblock The {MIDAS} touch: Mixed data sampling regression models.
+\newblock Working paper, UNC and UCLA.
+% http://www.cirano.qc.ca/pdf/publication/2004s-20.pdf
+
+\bibitem[Ghysels et al., 2007]{ghysels_midas_2007} Ghysels E, Sinko A, and Valkanov R. 2007.
+\newblock {MIDAS} regressions: Further results and new directions$^*$.
+\newblock \emph{Econometric Reviews} {\bf 26}: 53--90.
+%\newblock {\em Econometric Reviews}, 26(1):53--90. Feb., 2007.
+
+\bibitem[Golub and Van Loan, 1996]{golub:1996} Golub GH and Van Loan CF. 1996.
+\newblock \emph{Matrix computations}.
+\newblock 3rd ed. Johns Hopkins University Press: Baltimore.
+
+%\bibitem[Hannan and Quinn, 1979]{hannan:1979} Hannan, E.J. and B.C. Quinn, 1979,
+%\newblock The Determination of the Order of an Autoregression.
+%\newblock {Journal of the Royal Statistical Society. Series B (Methodological)} 41, 190--195. 
+
+%\bibitem[Ing, 2007]{ing:2007} Ing, C.-K. 2007,
+%\newblock Accumulated prediction errors, information criteria and optimal forecasting for autoregressive time series.
+%\newblock {The Annals of Statistics} 35, 1238--1277.
+
+%\bibitem[Ing and Wei, 2005]{ing:2005} Ing, C.-K. and C.-Z. Wei, 2005,
+%\newblock Order selection for same-realization predictions in autoregressive processes.
+%\newblock {The Annals of Statistics} 33, 2423--2474.
+
+%\bibitem[Ing et al., 2010]{ing:2010} Ing, C.-K., Sin C.-y. and S.-H. Yu, 2010,
+%\newblock Model selection for integrated autoregressive processes of infinite order.
+%\newblock Forthcoming in {Journal of Multivariate Analysis}.
+
+\bibitem[Kvedaras and Ra{\v c}kauskas, 2010]{kvedaras_regression_2010} Kvedaras V and Ra{\v c}kauskas A. 2010.
+\newblock Regression models with variables of different frequencies: The case   of a fixed frequency ratio.
+\newblock \emph{Oxford Bulletin of Economics and Statistics} {\bf 72}: 600--620.
+%\newblock {\em Oxford Bulletin of Economics and Statistics}, 72(5):600--620. Oct., 2010.
+
+\bibitem[Kvedaras and Zemlys, 2012]{kvedaras:2012} Kvedaras V and Zemlys V. 2012.
+\newblock Testing the functional constraints on parameters in regressions with variables of different frequency.
+\newblock \emph{Economics Letters} {\bf 116}: 250-254.
+
+%\bibitem[L{\" u}tkepohl, 1981]{lutkepohl:1981} L{\" u}tkepohl, H. 1981,
+%\newblock A model for non-negative and non-positive distributed lag functions.
+%\newblock {Journal of Econometrics} 16, 211--219.
+%\newblock {\em Journal of Econometrics}, 16:211--219.
+
+\bibitem[Miller, 2012]{miller:2012} Miller JI. 2012.
+\newblock Cointegrating MiDaS Regressions and a MiDaS Test.
+\newblock {Department of Economics, University of Missouri, Discussion Paper}.
+
+\bibitem[Newey and West, 1987]{newey:1987} Newey WK and West KD. 1987.
+\newblock A Simple, Positive-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix.
+\newblock \emph{Econometrica} {\bf 55}: 703-708.
+
+%\bibitem[Newey and West, 1994]{newey:1994} Newey, W.K., and West, K.D. 1994,
+%\newblock Automatic lag selection in covariance matrix estimation.
+%\newblock \emph{Review of Economic Studies} 61(4), 631-654.
+
+%\bibitem[Okun, 1962]{Okun:1962} 
+%Okun, A. (1962). 'Potential GNP: Its Measurement and Significance',
+%in \emph{Proceedings of the Business and Economic Statistics
+%Section}, American Statistical Association, Washington DC, pp.
+%98-103.
+
+%\bibitem[Prachowny, 1993]{Prachowny:1993} 
+%Prachowny, M. F. J. (1993). 'Okun's Law: Theoretical Foundations and
+%Revised Estimates', \emph{Review of Economics and Statistics},
+%Vol. 75, pp. 331-336.
+
+%\bibitem[Rodriguez and Puggioni, 2010]{rodriguez2010} Rodriguez, A. and G. Puggioni, 2010,
+%\newblock Mixed frequency models: Bayesian approaches to estimation and  prediction.
+%\newblock {International Journal of Forecasting} 26, 293--311.
+%\newblock {\em International Journal of Forecasting}, 26(2):293--311, 2010.
+
+%\bibitem[Sakia, 1992]{sakia:1992} Sakia, R.M. 1992,
+%\newblock The Box-Cox transformation technique: a review.
+%\newblock \emph{The Statistician} 41, 169-178. 
+
+%\bibitem[Smith, 2005]{smith:2005} Smith, R.J. 2005,
+%\newblock Automatic positive semidefinate HAC covariance matrix and GMM estimation.
+%\newblock \emph{Econometric Theory} 21(1), 158-170. 
+
+%\bibitem[Schwarz, 1978]{schwarz:1978} Schwarz, G. 1978,
+%\newblock {Estimating the Dimension of a Model}.
+%\newblock {The Annals of Statistics} 6, 461--464.
+
+
+%\bibitem[Schwert, 1989]{schwert:1989} Schwert, W. 1989,
+%\newblock {Test for unit roots: A Monte Carlo investigation}.
+%\newblock {Journal of Business and Economic Statistics} 7, 147--159.
+%\newblock {\em Journal of Business and Economic Statistics}, 7:147--159, 1989.
+
+%\bibitem[Shibata, 1980]{shibata:1980} Shibata, R. 1980,
+%\newblock {Asymptotically efficient selection of the order of the model for estimating parameters of a linear process}.
+%\newblock {The Annals of Statistics} 8, 147--164.
+
+%\bibitem[Shibata, 1981]{shibata:1981} Shibata, R. 1981,
+%\newblock {An optimal selection of regression variables}.
+%\newblock {Biometrika} 68, 45--54.
+
+
+%\bibitem[Sims, 1971]{sims:1971} Sims, C.A. 1971,
+%\newblock Distributed lag estimation when the parameter space is explicitly infinite-dimensional.
+%\newblock {The Annals of Mathematical Statistics} 42, 1622-1636.
+%\newblock \emph{The Annals of Mathematical Statistics} 42(5), 1622-1636.
+
+
+\bibitem[Sinko et al., 2012]{sinko:2012} Sinko A, Sockin M, and Ghysels E. 2012.
+\newblock Matlab toolbox for mixed sampling frequency data analysis using {MIDAS} regression models.
+\newblock Unpublished manuscript. Jul., 2012. 
+
+\bibitem[Schwarz, 1978]{schwarz:1978} Schwarz GE. 1978.
+\newblock Estimating the dimension of a model.
+\newblock \emph{Annals of Statistics} {\bf 6}: 461--464.
+
+
+%\bibitem[White, 1980]{white:1980} White, H. 1980,
+%\newblock A Heteroskedasticity-Consistent Covariance Matrix and a Direct test for Heteroskedasticity.
+%\newblock {Econometrica} 48, 817--838.
+
+%\bibitem[White, 1981]{white_consequences_1981} White, H. 1981,
+%\newblock Consequences and detection of misspecified nonlinear regression models.
+%\newblock {Journal of the American Statistical Association} 76, 419--433.
+%\newblock {\em Journal of the American Statistical Association}, 76(374):419--433. June, 1981.
+
+%\bibitem[White, 2000]{white_asymptotic_2000} White, H. 2000,
+%\newblock {Asymptotic theory for econometricians.}
+%\newblock Revised Edition, Academic Press, San Diego, etc.
+
+\bibitem[Zeileis, 2004]{zeileis:2004} Zeileis A. 2004.
+\newblock Econometric Computing with HC and HAC Covariance Matrix Estimators.
+\newblock \emph{Journal of Statistical Software} {\bf 11}: 1--17.
+
+
+%\bibitem[Wohlrabe, 2009]{wholrabe:2009} Wohlrabe, K. 2009,
+%\newblock Forecasting with mixed-frequency time series models.
+%\newblock Ph. D. Dissertation Ludwig-Maximilians-Universitat Munchen, 2009, http://edoc.ub.uni-muenchen.de/9681/.
+
+
+
+\end{thebibliography}
+
+\end{document}
+
