@@ -1,4 +1,4 @@
-\documentclass{jss}
+\documentclass[nojss]{jss}
 \usepackage{amsmath,amssymb}
 \usepackage{bm}
 \usepackage{multirow}
@@ -71,11 +71,20 @@ where $\bm{\lambda}$ is a vector of hyper-parameters.
 In order to estimate MIDAS regression high frequency regressor is
 embedded into low frequency domain. This is done via \code{fmls}
 function: 
-<<<echo=TRUE,results=verbatim>>=
-library(midasr)
-x <- 1:16
-fmls(x,3,4)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> library(midasr)
+> x <- 1:16
+> fmls(x,3,4)
+\end{Sinput}
+\begin{Soutput}
+     X.0/m X.1/m X.2/m X.3/m
+[1,]     4     3     2     1
+[2,]     8     7     6     5
+[3,]    12    11    10     9
+[4,]    16    15    14    13
+\end{Soutput}
+\end{Schunk}
 It is assumed that for each low-frequency observation there are
 exactly $m$ high-frequency observations.
 
@@ -100,16 +109,18 @@ during optimisation. The additional arguments if there are any must be
 listed into call to \code{fmls}.
 
 Set up the data and load all necessary packages
-<<echo=TRUE, results=verbatim>>=
-library(midasr)
-data("USunempr")
-data("USrealgdp")
-y <- diff(log(USrealgdp))
-x <- window(diff(USunempr), start = 1949)
-midas_r(y~fmls(x,11,12,nealmon),start=list(x=c(0,0,0)))
-@
+\begin{Schunk}
+\begin{Sinput}
+> library(midasr)
+> data("USunempr")
+> data("USrealgdp")
+> y <- diff(log(USrealgdp))
+> x <- window(diff(USunempr), start = 1949)
+> #midas_r(y~fmls(x,11,12,nealmon),start=list(x=c(0,0,0)))
+\end{Sinput}
+\end{Schunk}
 
-\bibliography{midas}
+%\bibliography{midas}
 
 \end{document}
 
