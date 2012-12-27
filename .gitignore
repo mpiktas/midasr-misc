@@ -21,6 +21,8 @@
 *.toc
 *.out
 *.gz
+*.bbl
+*.blg
 #Ignore output
 #output/*
 *~

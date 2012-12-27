@@ -1,4 +1,4 @@
-\documentclass{jss}
+\documentclass[nojss]{jss}
 \usepackage{amsmath,amssymb}
 \usepackage{bm}
 \usepackage{multirow}
@@ -10,15 +10,18 @@
 
 \author{Virmantas Kvedaras\\Vilnius University \And Vaidotas
   Zemlys\\Vilnius University}
+\Plainauthor{Virmantas Kvedaras, Vaidotas Zemlys}
 
-\title{Mixed Frequency Data Sampling Regression Models: the R Package \pkg{midasr}}
+\title{Mixed Frequency Data Sampling Regression Models: the \proglang{R}
+    Package \pkg{midasr}}
+\Plaintitle{Mixed Frequency Data Sampling Regression Models: the R Package midasr}
 \Shorttitle{R package \pkg{midasr}}
 
 \Abstract{
   The implementation of MIDAS approach in the \proglang{R} package \pkg{midasr} is described.
 }
 \Keywords{MIDAS, specification test}
-
+\Plainkeywords{MIDAS, specification test}
 \Address{
   Vaidotas Zemlys\\
   Department of Econometric Analysis\\
@@ -36,11 +39,60 @@
 
 \section{Introduction}
 
-The mixed data sampling (MIDAS) approach introduced in
-\cite{ghysels_touch_2002} has gained popularity in financial and some
+In econometric applications it is common to encounter time series
+which are sampled in different frequencies, e.g. quarterly vs yearly,
+etc. In order to use differently sampled series in regression analysis
+one of the series is usually aggregated. It is evident that some of
+the information is lost during such transformation. One of the
+solutions to this problem is the mixed data sampling (MIDAS) approach introduced in
+\cite{ghysels_touch_2002}. It has gained popularity in financial and some
 macroeconomic applications (see e.g. \citealp{foroni:2012}, and
 \citealp{sinko:2012}, for a recent overview of various
 contributions). In the most cases, it is used for the forecasting purposes.
+
+The main idea of MIDAS approach is based on observation that
+aggregation of high frequency time series is actualy a specific
+embedding of the high frequency domain to the low frequency
+domain. Say we have yearly series $Y_t$ and quaterly series
+$x_{\tau}$ and we want to estimate the model
+\begin{align*}
+  Y_{t}=f(x_{\tau})+\varepsilon_t
+\end{align*}
+The usual approach is to aggregate $x_{\tau}$ to a yearly sampling frequency:
+\begin{align*}
+  X_{t}=\frac{1}{4}(x_{4t}+x_{4t-1}+x_{4t-2}+x_{4t-3}),
+\end{align*}
+where we assume that yearly time series are observed at the same time
+as the fourth quarter of the quarterly time series. Then we can
+rewrite the model in the following form:
+\begin{align*}
+  Y_t=\alpha+\beta X_t+\varepsilon_t
+\end{align*}
+If we substitute the aggregation equation we see that this model is a
+restricted form of the more general model:
+\begin{align*}
+  Y_t=\alpha+w_1x_{4t}+w_2x_{4t-1}+w_3x_{x4t-2}+w_4x_{4t-3}+\varepsilon_t
+\end{align*}
+We can extend this model for general frequency ratio $m$ and including
+more lags resulting in so called U-MIDAS model:
+\begin{align*}
+  Y_t=\alpha+\sum_{h=0}^kw_hx_{tm-h}+\varepsilon_t.
+\end{align*}
+If frequency ratio $m$ is high, such
+model might not be feasible to estimate, due to lack of degrees of
+freedom. To solve this problem MIDAS approach suggests restricting the weights:
+\begin{align*}
+  w_h=g(h,\lambda), \quad, h=0,1,...,k
+\end{align*}
+where $g$ is some function and $\lambda$ is a vector of
+hyper-parameters. In MIDAS literature function $g$ is usually chosen from
+a fixed set of functions. The important question is then whether this
+chosen function is the correct one. Recently Kvedaras and Zemlys
+\cite{kz:2012} proposed a test which lets to test hypothesis whether the chosen weight function is appropriate.
+
+Package \pkg{midasr} is aimed at applied researcher. It allows to
+estimate the MIDAS regression model and test its feasibility.
+
 
 \section{Theory}
 
