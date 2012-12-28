@@ -7,6 +7,7 @@
 
 \newcommand{\specialcell}[2][c]{%
   \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\DeclareMathOperator{\argmin}{argmin}
 
 \author{Virmantas Kvedaras\\Vilnius University \And Vaidotas
   Zemlys\\Vilnius University}
@@ -98,68 +99,166 @@ estimate the MIDAS regression model and test its feasibility.
 
 \subsection{Simple MIDAS model}
 
-Consider a situation where we observe two processes $y=\{y_t\in
-\mathbb{R}, \ t=0,\pm 1,\pm 2\dots\}$  and $x=\{x_\tau\in \mathbb
-  {R}, \ \tau=0, \pm 1, \pm2 \dots\}$ at different frequencies. For
-each single low frequency observation $m$ high-frequency observations
-are available. 
+Consider a situation where we observe processes $y=\{y_t\in
+\mathbb{R}, \ t=0,\pm 1,\pm 2\dots\}$  and $\bm{z}=\{\bm{z}_t\in {\mathbb R^\ell}, \ \ell\in\mathbb{N}, \ t=0,\pm 1,\pm 2\dots\}$ are observed at a low frequency, whereas $x=\{x_\tau\in {\mathbb R}, \ \tau=0, \pm 1, \pm2 \dots\}$ is observed at a higher frequency with $m$ high-frequency observations available per each single low frequency period $t$.
 
-The MIDAS regression of $y$ on $x$ has the following representation
+The MIDAS regression of $y$ on $\bm{z}$ and $x$, assuming that $x$ makes an
+influence up to $k$ high-frequency lags, has the following representation
 \begin{align} \label{eq:1}
-  y_t=\sum_{h=0}^{d}\beta_hx_{tm-h}+\varepsilon_t. 
+  y_t=\sum_{h=0}^{k}w_hx_{tm-h}+\bm{z}_t'\bm{\gamma}+\varepsilon_t, 
+\end{align}
+where the coefficients $w_h$ are usually constrained by a functional constraint:
+\begin{align}\label{eq:weights}
+  w_h=g(\bm{\lambda},h), h=0,...,k
+\end{align}
+where $\bm{\lambda}$ is a vector of hyper-parameters.
+
+\subsection{Estimation}
+
+For the unrestricted model the coefficients $\beta_j$ and $\gamma$ can
+be estimated using OLS. For the restricted model, where weights depend
+on hyper-parameters we estimate the model parameters by non-linear
+least squares:
+\begin{align}\label{e:nls}
+  (\hat{\bm{\gamma}},\hat{\bm{\lambda}})=\argmin\sum_{t=[k/m]+1}^{n}\left(y_t-\sum_{h=0}^{k}g(\bm{\lambda},h)x_{tm-h}-\bm{z}_t'\bm{\gamma}\right)^2.
 \end{align}
 
-The coefficients $\beta_h$ are usually constrained by a functional constraint:
+Suppose that $\varepsilon_t$ are i.i.d and independent of
+$x_t$ and $\bm{z}_t$. Suppose next that $x$ and $\bm{z}$ are
+stationary and ergodic or deterministic with usual regularity
+conditions. Suppose that $g$ is twice-differentiable continuous
+function with respect to $\bm{\lambda}$. Then the estimates are
+consistent and assymptotically normal.
+
+\section{Testing}
+
+It is of interest to test whether the restriction \eqref{eq:weights}
+holds. Kvedaras and Zemlys \cite{kz:2012} have developed the test
+based on the difference between the estimates of weights of restricted
+model and the estimates of weights of unrestricted model. Denote by
+$\hat{\bm{\theta}}'=(\hat{\bm{w}}',\hat{\bm{\gamma}}')$ the OLS estimates
+of the model \eqref{eq:1} and by
+$\hat{\bm{f}}'=(g(\hat{\bm{\lambda}},0),...,g(\hat{\bm{\lambda}},k),\hat{\bm{\gamma}}')$. Then
+under null hypothesis that $w_h=g(\bm{\lambda})$: 
 \begin{align*}
-  \beta_h=g(\bm{\lambda},h), h=0,...,d
+  (\bm{\hat{\theta}}'-\hat{\bm{f}})\bm{A}(\bm{\hat{\theta}}-\bm{f})\sim \chi^2(k-r),
 \end{align*}
-where $\bm{\lambda}$ is a vector of hyper-parameters.
+where $\bm{A}$ is suitable normalisation matrix and $r$ is the dimension of
+the vector $\bm{\lambda}$.
 
 
 \section[Implementation in midasr package]{Implementation in \pkg{midasr} package}
 
-\subsection{Data formats}
+Since estimation of MIDAS model is a NLS problem, it is possible
+to estimate it using existing \proglang{R} functions, such as
+\code{nls} for example. There are however several challenges related
+to using existing \proglang{R} code: 
+\begin{itemize}
+\item The data in the model cannot be in one \code{data.frame}, since
+  the time series of different frequency are of different lengths. 
+\item MIDAS model requires special transformation of the high
+  frequency time series:  
+  \begin{align}\label{def:embed}
+    \begin{bmatrix}
+      x_1\\
+      \vdots\\
+      x_{Nm}
+    \end{bmatrix}
+    \to
+    \begin{bmatrix}
+      x_{lm} & x_{lm-1} & \dots & x_{lm-k}  \\
+      x_{(l+1)m} & x_{(l+1m)-1}& \dots & x_{(l+1)m-k}\\
+      \hdotsfor{4}\\
+      x_{Nm} & x_{Nm-1} & \dots & x_{Nm-k }
+    \end{bmatrix}
+  \end{align}  
+  where $N$ is the low-frequency sample size and $k$ is the
+  high-frequency lag. There is no existing \proglang{R} function which
+  performs such operation.
+\end{itemize}
+The package \pkg{midasr} gives a solution to these challenges. It lets
+applied researcher to specify the MIDAS model using familiar
+\code{formula} interface making the estimation of MIDAS models similar
+to other existing regression models.
 
-In order to estimate MIDAS regression high frequency regressor is
-embedded into low frequency domain. This is done via \code{fmls}
-function: 
+ 
+
+\subsection{Embedding of high-frequency time series }
+
+High frequency time series are embedded to low-frequency with \code{fmls}
+function. This function takes as an arguments the high-frequency time
+series, the number of high-frequency lags and the frequency ratio and
+performs the transformation \eqref{def:embed}: 
 <<<echo=TRUE,results=verbatim>>=
 library(midasr)
 x <- 1:16
 fmls(x,3,4)
 @ 
 It is assumed that for each low-frequency observation there are
-exactly $m$ high-frequency observations.
+exactly $m$ high-frequency observations. This means that the frequency
+ratio must divide the length of
+the time series passed to \code{fmls}. The result of this division is
+the number of rows of the resulting matrix. 
 
-\subsection{Model specification}
+If $m=1$ this function behaves
+exactly as function \code{embed}, with exception that it padds the
+resulting matrix with \code{NA}'s
+<<echo=TRUE,results=verbatim>>=
+x <- 1:4
+fmls(x,2,1)
+embed(x,3)
+@
 
-The specification of MIDAS regression is done via usual \code{formula}
-interface with the help of the function \code{fmls}. For MIDAS
-regression we need to specify the frequency ratio $m$, the number of
-lags and the weight function. Since optimisation is used to estimate
-the coefficients, the starting values must be supplied. 
+\subsection{Estimation of unrestricted MIDAS model}
 
-\begin{Code}
-midas_r(y~fmls(x,11,12,nealmon),start=list(x=c(0,0,0)))  
-\end{Code}
 
-The first argument of weight function must be the vector of
-hyper-parameters. The second argument must be the number of the
-coefficients the weight function returns. The number of the
-coefficients is the number of lags plus one  so it is already defined
-in formula specification. Accordingly it is passed to weight function
-during optimisation. The additional arguments if there are any must be
-listed into call to \code{fmls}.
+Recall that unrestricted MIDAS model can be estimated with OLS. Function
+\code{fmls} enables to 
+use existing \proglang{R} function \code{lm} for estimating linear models.
+For illustration purposes we use data from the Okun's law example
+analyzed in \cite{kz:2012} and \cite{kvedaras_regression_2010}. 
+MIDAS model is then
+\begin{align*}
+  \Delta \log Y_t = \alpha_0 + \alpha_1 t + \sum_{h=0}^kw_h\Delta U_{tm-h}\varepsilon_t,
+\end{align*}
+where $Y$ and $U$ denote real GDP and unemployment rate of US, and
+$\Delta$ is the difference operator.
 
-Set up the data and load all necessary packages
-<<echo=TRUE, results=verbatim>>=
-library(midasr)
-data("USunempr")
+<<echo=TRUE,results=verbatim>>=
 data("USrealgdp")
+data("USunempr")
 y <- diff(log(USrealgdp))
 x <- window(diff(USunempr), start = 1949)
+trend <- 1:length(y)
+lm(y~trend+fmls(x,11,12))
+@ %def 
+
+As we see there is no problem of passing different length time series
+to \code{lm}. \proglang{R} simply picks the data from the environment
+it is called from. Sometimes it is necessary to specify data
+directly. This is possible by using \code{midas_u} function:
+
+<<echo=TRUE,results=verbatim>>=
+ldata <- data.frame(y=y,trend=trend) 
+hdata <- data.frame(x=x)
+midas_u(y~trend+fmls(x,11,12),ldata,hdata)
+@ %def 
+
+As we see \code{lm} object is returned, so it is possible to do
+everything what can be done with usual \code{lm} object.
+
+\subsection{Estimation of restricted MIDAS model}
+The restricted model requires that weights are specified. This is done
+by passing the weight function as an additional argument for
+\code{fmls} in MIDAS model specification.
+
+<<echo=TRUE, results=verbatim>>=
 midas_r(y~fmls(x,11,12,nealmon),start=list(x=c(0,0,0)))
 @
+
+Here we estimate MIDAS model with normalized exponential Almon lag
+weights. Since we use optimisation, we need to specify starting values.
+
 
 \bibliography{midas}
 
