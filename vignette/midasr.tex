@@ -309,9 +309,27 @@ As we see \code{lm} object is returned, so it is possible to do
 everything what can be done with usual \code{lm} object.
 
 \subsection{Estimation of restricted MIDAS model}
-The restricted model requires that weights are specified. This is done
-by passing the weight function as an additional argument for
-\code{fmls} in MIDAS model specification.
+The restricted model requires that weights are specified. For our
+example let us use normalized exponential Almon polynomial weights:
+\begin{align*}
+  w_i=w_i(\beta,\theta_1,...,\theta_P)=\beta\frac{\exp(\theta_1i+...+\theta_Pi^P)}{\sum_{l=1}^n\exp(\theta_1l+...+\theta_Pl^P)}
+\end{align*}
+To use it in \pkg{midasr} we need to specify it in the following way:
+\begin{Schunk}
+\begin{Sinput}
+> nealmon <- function(p,d) {
++   i <- (1:d)/100
++   plc <- poly(i,degree=length(p)-1,raw=TRUE) %*% p[-1]
++   as.vector(p[1] * exp(plc)/sum(exp(plc)))
++ }
+\end{Sinput}
+\end{Schunk}
+The first argument must be a vector with all the hyper parameters and
+the second argument must be the number of the coefficients. Note the
+scaling of the polynomial, which is done purely for computational reasons.
+
+Having specified the weight function we can proceed to estimating
+of the corresponding MIDAS model. 
 
 \begin{Schunk}
 \begin{Sinput}
@@ -327,11 +345,21 @@ Function optim was used for fitting
 \end{Soutput}
 \end{Schunk}
 
-Here we estimate MIDAS model with normalized exponential Almon lag
-weights. Since we use optimisation, we need to specify starting values.
+Here we specify that we use weight function \code{nealmon} for
+variable \code{x} and we supply starting values for the
+optimisation. The result is an object of class \code{midas_r}, which
+is a type of fitted model object. 
+
+
+
 
 
 \bibliography{midas}
 
 \end{document}
 
+It has the usual methods for generic
+functions: \code{summary}, \code{coef}, \code{residuals},
+\code{deviance}, \code{fitted}, \code{predict}, \code{logLik}. It also
+has additional methods for estimating robust standard errors:
+\code{estfun} and \code{bread}. 

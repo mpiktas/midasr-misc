@@ -248,19 +248,54 @@ As we see \code{lm} object is returned, so it is possible to do
 everything what can be done with usual \code{lm} object.
 
 \subsection{Estimation of restricted MIDAS model}
-The restricted model requires that weights are specified. This is done
-by passing the weight function as an additional argument for
-\code{fmls} in MIDAS model specification.
+The restricted model requires that weights are specified. For our
+example let us use normalized exponential Almon polynomial weights:
+\begin{align*}
+  w_i=w_i(\beta,\theta_1,...,\theta_P)=\beta\frac{\exp(\theta_1i+...+\theta_Pi^P)}{\sum_{l=1}^n\exp(\theta_1l+...+\theta_Pl^P)}
+\end{align*}
+To use it in \pkg{midasr} we need to specify it in the following way:
+<<echo=TRUE,results=verbatim>>=
+nealmon <- function(p,d) {
+  i <- (1:d)/100
+  plc <- poly(i,degree=length(p)-1,raw=TRUE) %*% p[-1]
+  as.vector(p[1] * exp(plc)/sum(exp(plc)))
+}
+@ %def 
+The first argument must be a vector with all the hyper parameters and
+the second argument must be the number of the coefficients. Note the
+scaling of the polynomial, which is done purely for computational reasons.
+
+Having specified the weight function we can proceed to estimating
+of the corresponding MIDAS model. 
 
 <<echo=TRUE, results=verbatim>>=
 midas_r(y~fmls(x,11,12,nealmon),start=list(x=c(0,0,0)))
 @
 
-Here we estimate MIDAS model with normalized exponential Almon lag
-weights. Since we use optimisation, we need to specify starting values.
+Here we specify that we use weight function \code{nealmon} for
+variable \code{x} and we supply starting values for the
+optimisation. The result is an object of class \code{midas_r}, which
+is a type of fitted model object. 
+
+
+The numerical optimisation is done in the way that other \proglang{R}
+
+
+Function \code{midas_r} parses the formula and prepares function
+\code{fn0}, which takes as argument a vector of all model parameters
+and returns the sum of squares in ~\eqref{e:nls}. This function can be
+passed to any optimisation function. By default it is passed to
+\code{optim}.  
+
+
 
 
 \bibliography{midas}
 
 \end{document}
 
+It has the usual methods for generic
+functions: \code{summary}, \code{coef}, \code{residuals},
+\code{deviance}, \code{fitted}, \code{predict}, \code{logLik}. It also
+has additional methods for estimating robust standard errors:
+\code{estfun} and \code{bread}. 
