@@ -12,5 +12,5 @@ tbd <- foreach(i=1:1,.combine="c") %do% {
     dk <- param$d[i]
     m <- param$m[i]
     ar <- param$ar[i]
-    list(sim.rowdata(1,n,dk,m,ar,weight=nealmon,cf=g0))
+    list(sim.rowdata(2000,n,dk,m,ar,weight=nealmon,cf=g0))
 }

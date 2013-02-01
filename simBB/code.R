@@ -1,3 +1,7 @@
+require(midasr)
+
+imidas_r_fast <- midasr:::imidas_r_fast
+  
 gendata <- function(n,dk,m,ar,innov.sd,theta) {
     vv <- simplearma.sim(model=list(ar=ar),(n+(dk+1))*m,innov.sd,m)
     xx <- ts(cumsum(vv),start=start(vv),frequency=frequency(vv))
@@ -53,6 +57,6 @@ size.imr.fast <- function(n,dk,m,ar,innov.sd=1,weight,cf,simplify=TRUE) {
 
 sim.rowdata <- function(N,n,dk,m,ar,innov.sd=1,weight,cf) {
     res <- foreach(i=1:N,.combine="rbind") %dopar% {
-        size.imr.fast(n,dk,m,ar,weight=weigth,cf=cf,simplify=TRUE)
+        size.imr.fast(n,dk,m,ar,weight=weight,cf=cf,simplify=TRUE)
     }
 }
