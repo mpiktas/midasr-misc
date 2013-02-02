@@ -56,7 +56,7 @@ size.imr.fast <- function(n,dk,m,ar,innov.sd=1,weight,cf,simplify=TRUE) {
 }
 
 sim.rowdata <- function(N,n,dk,m,ar,innov.sd=1,weight,cf) {
-    res <- foreach(i=1:N,.combine="rbind") %dopar% {
-        size.imr.fast(n,dk,m,ar,weight=weight,cf=cf,simplify=TRUE)
+    res <- foreach(i=1:N,.combine="c",errorhandling="pass") %dopar% {
+        list(try(size.imr.fast(n,dk,m,ar,weight=weight,cf=cf,simplify=FALSE)))
     }
 }
