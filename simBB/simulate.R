@@ -7,12 +7,10 @@ param <- expand.grid(n=c(75,125,200,500,1000),d=c(11,23,47),m=c(12,24),ar=c(0.5,
 
 param <- subset(param,!(m==12 & d==47))
 
-Rprof()
-tm<-system.time(tbd <- foreach(i=1:nrow(param),.combine="c",.errorhandling="pass") %do% {
+tm<-system.time(tbd <- foreach(i=1:5,.combine="c",.errorhandling="pass") %do% {
     n <- param$n[i]
     dk <- param$d[i]
     m <- param$m[i]
     ar <- param$ar[i]
-    list(sim.rowdata(2000,n,dk,m,ar,weight=nealmon,cf=g0))
+    list(sim.rowdata(N,n,dk,m,ar,weight=nealmon,cf=g0))
 })
-Rprof(NULL)
