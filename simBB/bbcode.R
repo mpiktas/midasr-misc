@@ -20,7 +20,7 @@ be.isskirciu = function(rinkinys) {
     # uz statistikas, gautas sukonvergavimo atvejais. Taigi jei statistiku
     # rinkinyje rasim dideli tuscia tarpa, vadinasi uz to tarpo esancios
     # statistikos buvo gautos, kai parametrai nudivergavo.
-
+    return(rinkinys)
     tarpas = 100
     rinkinys = sort(rinkinys, na.last = NA)  #isremoovina galimas NA reiksmes
     l = length(rinkinys)
@@ -36,7 +36,7 @@ be.isskirciu = function(rinkinys) {
 }
 
 f.eilute = function(rep, n, f_dgp, gamma_dgp, f_used, r_f_used, ar.koef, sigma_u, 
-    m, k) {
+    m, k,d_k) {
     library(midasr)
     library(numDeriv)
     rinkinys.rnls = numeric(rep)
@@ -44,9 +44,9 @@ f.eilute = function(rep, n, f_dgp, gamma_dgp, f_used, r_f_used, ar.koef, sigma_u
     rinkinys.rnls_nls = numeric(rep)
     rinkinys.rnls_nls2 = numeric(rep)
     rinkinys.T_d = numeric(rep)
-    try(for (i in 1:rep) {
+    for (i in 1:rep) {
         ## duomenys##
-        d_k = m * k + m
+       # d_k = m * k + m
         n_d = n
         v = arima.sim(n_d * m + 10 * m, model = list(ar = ar.koef), sd = 1)
         x = cumsum(v)
@@ -61,7 +61,7 @@ f.eilute = function(rep, n, f_dgp, gamma_dgp, f_used, r_f_used, ar.koef, sigma_u
         theta = f_dgp(gamma_dgp, d_k)
         theta_plius = c(theta, theta[length(theta)])
         y = Z %*% theta_plius + rnorm(n_d, sd = sigma_u)
-        
+
         ## vertinimas## OLS##
         tetai = solve(t(Z) %*% Z) %*% t(Z) %*% y
         theta.ols = tetai[1:d_k]
@@ -90,7 +90,7 @@ f.eilute = function(rep, n, f_dgp, gamma_dgp, f_used, r_f_used, ar.koef, sigma_u
             reltol = sqrt(.Machine$double.eps)/10), hessian = T)
         gamma.nls = opt_f$par
         theta.nls = f_used(gamma.nls, d_k)
-        
+
         ## plot## plot(theta_plius) ##tikri parametrai lines(tetai) ##OLS
         ## lines(theta.rnls, col=2) lines(theta.nls, col=3)
         
@@ -111,7 +111,7 @@ f.eilute = function(rep, n, f_dgp, gamma_dgp, f_used, r_f_used, ar.koef, sigma_u
         h.nls = sqrt(n_d) * (theta.ols - theta.nls)/sqrt(s2)
         T.nls = t(h.nls) %*% ginv(Sigma.nls) %*% h.nls
         rinkinys.nls[i] = T.nls
-        
+      #  browser()
         ## statistika T.rnls_nls
         h.rnls_nls = sqrt(n_d) * (theta.rnls - theta.nls)/sqrt(s2)
         Sigma.rnls_nls = Delt.rnls %*% t(P) %*% ginv(P %*% Delt.rnls %*% t(P)) %*% 
@@ -158,7 +158,7 @@ f.eilute = function(rep, n, f_dgp, gamma_dgp, f_used, r_f_used, ar.koef, sigma_u
         rinkinys.T_d[i] = T_d
         
     }  ##monte skliaustelio pabaiga
-, TRUE)
+
     ## density plot if(rep>1) { par(mfrow=c(2,2)) plot(density(rinkinys.rnls),
     ## main='rnls, df=d-r+1') lines(density(rchisq(100000, df=d_k-2)), col=2)
     ## plot(density(rinkinys.nls), main='nls, df=d-r') lines(density(rchisq(100000,
@@ -198,9 +198,10 @@ f.eilute = function(rep, n, f_dgp, gamma_dgp, f_used, r_f_used, ar.koef, sigma_u
     ats = c(galia.rnls, galia.nls, galia.rnls_nls, galia.rnls_nls2, galia.T_d)
     ats = t(as.matrix(ats))
     colnames(ats) = c("rnls", "nls", "rnls-nls(1)", "rnls-nls(2)", "H0:f(,d)=theta_d")
-    aa <- as.list(sys.frame(1))
+#    aa <- as.list(sys.frame(1))
 
-    return(list(ats,dt=aa))
+    #return(list(ats,data=aa))
+    ats
 }
 
 
