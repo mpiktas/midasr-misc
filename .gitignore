@@ -1,6 +1,7 @@
 #Ignore main .RData 
 *.RData
 #Ignore all R transcript files
+*.Rhistory
 *.R~
 *.Rt
 #Ignore some picture files
