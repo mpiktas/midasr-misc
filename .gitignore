@@ -27,6 +27,9 @@
 #Ignore output
 #output/*
 *~
-
 ##Ignore .gitignore
 .gitignore
+
+_region*
+*.rel
+
