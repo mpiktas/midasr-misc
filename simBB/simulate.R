@@ -18,7 +18,6 @@ set.seed(1234)
 
 if(size) {
     tbd <- simtb(N,param,nealmon,g0,simplify=TRUE)
-}
-else {
+}else {
     ptb <- simtb(N,param,f.theta.kz3,g1,nealmon,g0,simplify=TRUE)
 }

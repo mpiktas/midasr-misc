@@ -85,12 +85,12 @@ f.theta.kz3 <- function(p, dk) {
     (p[1]*i)*exp(p[2]*i + p[3]*i^2)
 }
 
-simtb <- function(N,param,weight0,cf0,weight1=weight0,cf1=cf0,simplify=FALSE) {    
+simtb <- function(N,param,weight0,cf0,weight1=weight0,cf1=cf0,innov.sd=1,simplify=FALSE) {    
     foreach(i=1:nrow(param),.combine="c",.errorhandling="pass") %dorng% {
         n <- param$n[i]
         dk <- param$d[i]
         m <- param$m[i]
         ar <- param$ar[i]
-        list(try(sim.rowdata2(N,n,dk,m,ar,weight0,cf0,weight1,cf1,simplify=TRUE)))
+        list(try(sim.rowdata2(N,n,dk,m,ar,innov.sd=innov.sd,weight0,cf0,weight1,cf1,simplify=TRUE)))
     }
 }
