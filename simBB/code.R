@@ -96,3 +96,22 @@ simtb <- function(N,param,weight0,cf0,weight1=weight0,cf1=cf0,innov.sd=1,simplif
         list(try(sim.rowdata2(N,n,dk,m,ar,innov.sd=innov.sd,weight0,cf0,weight1,cf1,simplify=TRUE)))
     }
 }
+
+selstat <- function(x,type="td",thresh=0.1) {
+    st <- paste("t",type,sep=".")
+    if(is.list(x)) {
+	test <- sqrt(sum(x[[type]][["gr0"]]^2))
+	if(test<thresh) return(x[[st]][["p.value"]])
+    }
+    NA
+}
+calccol <- function(tb,type="td",thresh=0.1) {
+    lc <- sapply(tb,function(l)sapply(l,selstat,type=type,thresh=thresh))
+    res<-apply(lc,2,function(x){
+	xx<-na.omit(x)
+	c(sum(xx<0.5)/length(xx),length(xx))
+    })
+    res<-t(res)
+    colnames(res) <- c(type,paste("n",type,sep=""))
+    res
+}
