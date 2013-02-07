@@ -40,8 +40,8 @@ size.imr <- function(n,dk,m,ar,innov.sd=1,weight,cf,simplify=TRUE) {
     }
 }
 
-size.imr.fast <- function(n,dk,m,ar,innov.sd=1,weight,cf,simplify=TRUE) {
-    theta <- weight(cf,dk+1)
+size.imr.fast <- function(n,dk,m,ar,innov.sd=1,weight0,cf0,weight1=weight0,cf1=cf0,simplify=TRUE) {
+    theta <- weight0(cf0,dk+1)
     dt <- gendata(n,dk,m,ar,innov.sd,theta)
     y <- dt$y
     x <- dt$x
@@ -52,8 +52,8 @@ size.imr.fast <- function(n,dk,m,ar,innov.sd=1,weight,cf,simplify=TRUE) {
     model <- na.omit(cbind(y,xmd[,2],V))
     model1 <- na.omit(cbind(y,xmd[,1],V[,1:dk]))
     
-    imr.nls <- imidas_r_fast(y,x,dk,weight,start=rnorm(length(cf)),imodel="twosteps",model.matrix=model)
-    imr.td <- imidas_r_fast(y,x,dk,weight,start=rnorm(length(cf)),imodel="reduced",model.matrix=model1)
+    imr.nls <- imidas_r_fast(y,x,dk,weight1,start=rnorm(length(cf1)),imodel="twosteps",model.matrix=model)
+    imr.td <- imidas_r_fast(y,x,dk,weight1,start=rnorm(length(cf1)),imodel="reduced",model.matrix=model1)
        
     if(simplify) {
         inls <- ihAh.nls.test(imr.nls)
@@ -72,10 +72,25 @@ sim.rowdata <- function(N,n,dk,m,ar,innov.sd=1,weight,cf) {
     }
 }
 
-sim.rowdata2 <- function(N,n,dk,m,ar,innov.sd=1,weight,cf,simplify=FALSE) {
+sim.rowdata2 <- function(N,n,dk,m,ar,innov.sd=1,weight0,cf0,weight1=weight0,cf1=cf0,simplify=FALSE) {
     res <- vector("list",N)
     for(i in 1:N){
-        res[[i]] <- try(size.imr.fast(n,dk,m,ar,weight=weight,cf=cf,simplify=simplify))
+        res[[i]] <- try(size.imr.fast(n,dk,m,ar,weight0=weight0,cf0=cf0,weight1=weight1,cf1=cf1,simplify=simplify))
     }
     res
+}
+
+f.theta.kz3 <- function(p, dk) {
+    i <- (1:dk)/100
+    (p[1]*i)*exp(p[2]*i + p[3]*i^2)
+}
+
+simtb <- function(N,param,weight0,cf0,weight1=weight0,cf1=cf0,simplify=FALSE) {    
+    foreach(i=1:nrow(param),.combine="c",.errorhandling="pass") %dorng% {
+        n <- param$n[i]
+        dk <- param$d[i]
+        m <- param$m[i]
+        ar <- param$ar[i]
+        list(try(sim.rowdata2(N,n,dk,m,ar,weight0,cf0,weight1,cf1,simplify=TRUE)))
+    }
 }
