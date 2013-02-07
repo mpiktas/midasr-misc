@@ -97,11 +97,11 @@ simtb <- function(N,param,weight0,cf0,weight1=weight0,cf1=cf0,innov.sd=1,simplif
     }
 }
 
-selstat <- function(x,type="td",thresh=0.1) {
+selstat <- function(x,type="td",thresh=0.1,stat="p.value") {
     st <- paste("t",type,sep=".")
     if(is.list(x)) {
 	test <- sqrt(sum(x[[type]][["gr0"]]^2))
-	if(test<thresh) return(x[[st]][["p.value"]])
+	if(test<thresh) return(x[[st]][[stat]])
     }
     NA
 }
@@ -115,3 +115,20 @@ calccol <- function(tb,type="td",thresh=0.1) {
     colnames(res) <- c(type,paste("n",type,sep=""))
     res
 }
+cstarhat<-function(row,alpha=0.05,type="td",thresh=0.1) {
+    t0<-sapply(row,selstat,type=type,thresh=thresh,stat="statistic")
+    t0 <- na.omit(t0)
+    quantile(t0,1-alpha)
+}
+adjpow <- function(tb,pow,alpha=0.05,type="td",thresh=0.1) {
+    cstar<-sapply(tb,cstarhat,alpha=alpha,type=type,thresh=0.1)
+    lc <- lapply(pow,function(l)sapply(l,selstat,type=type,thresh=thresh,stat="statistic"))
+    res <- mapply(function(row,cs){
+	xx<- na.omit(row)
+	c(sum(xx>cs)/length(xx),length(xx))
+    },lc,cstar)
+    res <- t(res) 
+    colnames(res) <- c(type,paste("n",type,sep=""))
+    res
+}
+
