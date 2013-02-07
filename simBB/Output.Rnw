@@ -1,0 +1,16 @@
+\documentclass{article}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{multirow}
+\usepackage{dcolumn}
+\begin{document}
+
+<<echo=FALSE,results=tex>>=
+library(stargazer)
+library(xtable)
+tb<-read.csv("lentele.csv")
+#tb$ar <- round(tb$ar,2)
+#stargazer(tb,summary=FALSE,align=TRUE,digit.separate=0)
+print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0)),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)))
+@ 
+\end{document}

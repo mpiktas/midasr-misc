@@ -54,15 +54,17 @@ size.imr.fast <- function(n,dk,m,ar,innov.sd=1,weight0,cf0,weight1=weight0,cf1=c
     
     imr.nls <- imidas_r_fast(y,x,dk,weight1,start=rnorm(length(cf1)),imodel="twosteps",model.matrix=model)
     imr.td <- imidas_r_fast(y,x,dk,weight1,start=rnorm(length(cf1)),imodel="reduced",model.matrix=model1)
-       
+    imr.td2 <- imidas_r_fast(y,x,dk,weight1,start=rnorm(length(cf1)),imodel="reduced2",model.matrix=model1)
+    
     if(simplify) {
         inls <- ihAh.nls.test(imr.nls)
         itd <- ihAh.Td.test(imr.td)
+        itd2 <- ihAh.Td.test(imr.td2)
         nm <- c("statistic","p.value")
-        return(list(t.nls=inls[nm],t.td=itd[nm],nls=imr.nls$opt,td=imr.td$opt))
+        return(list(t.nls=inls[nm],t.td=itd[nm],t.td2=itd2[nm],nls=imr.nls$opt,td=imr.td$opt,td2=imr.td2$opt))
     }
     else {
-        list(nls=imr.nls,td=imr.td,theta=theta,data=dt,model=model,model1=model1)
+        list(nls=imr.nls,td=imr.td,td2=imr.td2,theta=theta,data=dt,model=model,model1=model1)
     }
 }
 
