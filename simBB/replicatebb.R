@@ -13,12 +13,13 @@ pp <- function(p,dk)cumsum(nealmon(p,dk))
 
 set.seed(1234)
 Rprof()
-system.time(rb <- f.eilute(100,n,pp,g0,pp,3,ar,sigma_u=1,m,k,dk))
+system.time(rb <- f.eilute(1,n,pp,g0,pp,3,ar,sigma_u=1,m,k,dk))
 Rprof(NULL)
 
 set.seed(1234)
 Rprof()
-system.time(rz <- sim.rowdata2(100,n,dk-1,m,ar,weight=nealmon,cf=g0,simplify=FALSE))
+system.time(rz <- sim.rowdata2(1,n,dk-1,m,ar,weight0=nealmon,cf0=g0,simplify=FALSE))
+
 Rprof(NULL)
 
 set.seed(1234)
