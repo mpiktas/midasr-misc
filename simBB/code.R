@@ -77,4 +77,5 @@ sim.rowdata2 <- function(N,n,dk,m,ar,innov.sd=1,weight,cf,simplify=FALSE) {
     for(i in 1:N){
         res[[i]] <- try(size.imr.fast(n,dk,m,ar,weight=weight,cf=cf,simplify=simplify))
     }
+    res
 }
