@@ -17,7 +17,7 @@ param <- subset(param,!(m==12 & d==47))
 set.seed(1234)
 
 if(size) {
-    tbd <- simtb(N,param,nealmon,g0,simplify=TRUE)
+    tbd <- simtb(N,param,nealmon,g0,innov.sd,simplify=TRUE)
 }else {
-    ptb <- simtb(N,param,f.theta.kz3,g1,nealmon,g0,simplify=TRUE)
+    ptb <- simtb(N,param,f.theta.kz3,g1,nealmon,g0,innov.sd,simplify=TRUE)
 }
