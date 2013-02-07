@@ -59,7 +59,7 @@ size.imr.fast <- function(n,dk,m,ar,innov.sd=1,weight,cf,simplify=TRUE) {
         inls <- ihAh.nls.test(imr.nls)
         itd <- ihAh.Td.test(imr.td)
         nm <- c("statistic","p.value")
-        return(c(unlist(inls[nm]),unlist(itd[nm])))
+        return(list(t.nls=inls[nm],t.td=itd[nm],nls=imr.nls$opt,td=imr.td$opt))
     }
     else {
         list(nls=imr.nls,td=imr.td,theta=theta,data=dt,model=model,model1=model1)
