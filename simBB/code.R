@@ -52,9 +52,9 @@ size.imr.fast <- function(n,dk,m,ar,innov.sd=1,weight0,cf0,weight1=weight0,cf1=c
     model <- na.omit(cbind(y,xmd[,2],V))
     model1 <- na.omit(cbind(y,xmd[,1],V[,1:dk]))
     
-    imr.nls <- imidas_r_fast(y,x,dk,weight1,start=rnorm(length(cf1)),imodel="twosteps",model.matrix=model)
-    imr.td <- imidas_r_fast(y,x,dk,weight1,start=rnorm(length(cf1)),imodel="reduced",model.matrix=model1)
-    imr.td2 <- imidas_r_fast(y,x,dk,weight1,start=rnorm(length(cf1)),imodel="reduced2",model.matrix=model1)
+    imr.nls <- imidas_r_fast(y,x,dk,weight1,start=cf1+rnorm(length(cf1))/5,imodel="twosteps",model.matrix=model)
+    imr.td <- imidas_r_fast(y,x,dk,weight1,start=cf1+rnorm(length(cf1))/5,imodel="reduced",model.matrix=model1)
+    imr.td2 <- imidas_r_fast(y,x,dk,weight1,start=cf1+rnorm(length(cf1))/5,imodel="reduced2",model.matrix=model1)
     
     if(simplify) {
         inls <- ihAh.nls.test(imr.nls)
@@ -109,7 +109,7 @@ calccol <- function(tb,type="td",thresh=0.1) {
     lc <- sapply(tb,function(l)sapply(l,selstat,type=type,thresh=thresh))
     res<-apply(lc,2,function(x){
 	xx<-na.omit(x)
-	c(sum(xx<0.5)/length(xx),length(xx))
+	c(sum(xx<0.05)/length(xx),length(xx))
     })
     res<-t(res)
     colnames(res) <- c(type,paste("n",type,sep=""))
@@ -132,3 +132,16 @@ adjpow <- function(tb,pow,alpha=0.05,type="td",thresh=0.1) {
     res
 }
 
+sizetable<-function(tbd,param,thresh=0.1) {
+    snls <- calccol(tbd,type="nls",thresh=thresh)
+    std <- calccol(tbd,type="td",thresh=thresh)
+    std2 <- calccol(tbd,type="td2",thresh=thresh)
+    cbind(param,snls,std,std2)
+}
+
+aptable<-function(tbd,pow,param,alpha=0.05,thresh=0.1) {
+    anls<-adjpow(tbd,pow,alpha,type="nls",thresh=thresh)
+    astd <- adjpow(tbd,pow,alpha,type="td",thresh=thresh)
+    astd2<-adjpow(tbd,pow,alpha,type="td2",thresh=thresh)
+    cbind(param,anls,astd,astd2)
+}
