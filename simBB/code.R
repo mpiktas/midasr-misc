@@ -101,7 +101,7 @@ selstat <- function(x,type="td",thresh=0.1,stat="p.value") {
     st <- paste("t",type,sep=".")
     if(is.list(x)) {
 	test <- sqrt(sum(x[[type]][["gr0"]]^2))
-	if(test<thresh) return(x[[st]][[stat]])
+	if(test<thresh& x[[type]]$convergence==0) return(x[[st]][[stat]])
     }
     NA
 }
