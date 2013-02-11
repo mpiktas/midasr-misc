@@ -3,14 +3,53 @@
 \usepackage{bm}
 \usepackage{multirow}
 \usepackage{dcolumn}
+\topmargin=0cm
+\textheight=700pt
+\textwidth=430pt
+\oddsidemargin=0pt
+\headsep=0pt
+\headheight=0pt
 \begin{document}
 
+\section{Size}
+<<echo=FALSE,results=tex>>=
+library(stargazer)
+library(xtable)
+tb<-read.csv("size.csv")
+#tb$ar <- round(tb$ar,2)
+#stargazer(tb,summary=FALSE,align=TRUE,digit.separate=0)
+print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0)),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),floating=FALSE)
+@ 
+
+\section{Power}
+<<echo=FALSE,results=tex>>=
+library(stargazer)
+library(xtable)
+tb<-read.csv("power.csv")
+#tb$ar <- round(tb$ar,2)
+#stargazer(tb,summary=FALSE,align=TRUE,digit.separate=0)
+print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0)),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),floating=FALSE)
+@ 
+
+\newpage
+\section{Adjusted Power}
+<<echo=FALSE,results=tex>>=
+library(stargazer)
+library(xtable)
+tb<-read.csv("adjpower.csv")
+#tb$ar <- round(tb$ar,2)
+#stargazer(tb,summary=FALSE,align=TRUE,digit.separate=0)
+print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0)),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),floating=FALSE)
+@ 
+\newpage
+\section{Size with different starting values and gradient threshold 15}
 <<echo=FALSE,results=tex>>=
 library(stargazer)
 library(xtable)
 tb<-read.csv("lentele.csv")
 #tb$ar <- round(tb$ar,2)
 #stargazer(tb,summary=FALSE,align=TRUE,digit.separate=0)
-print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0)),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)))
+print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0)),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),floating=FALSE)
 @ 
+
 \end{document}
