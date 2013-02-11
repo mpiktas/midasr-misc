@@ -117,7 +117,12 @@ simtb <- function(N,param,weight0,cf0,weight1=weight0,cf1=cf0,innov.sd=1,simplif
         dk <- param$d[i]
         m <- param$m[i]
         ar <- param$ar[i]
-        list(try(sim.rowdata2(N,n,dk,m,ar,innov.sd=innov.sd,weight0,cf0,weight1,cf1,simplify=TRUE)))
+        if(is.matrix(cf1)) {
+            cf1c <- cf1[,as.character(dk)]
+        } else {
+            cf1c <- cf1
+        }
+        list(try(sim.rowdata2(N,n,dk,m,ar,innov.sd=innov.sd,weight0,cf0,weight1,cf1c,simplify=TRUE)))
     }
 }
 
@@ -177,4 +182,22 @@ aptable<-function(tbd,pow,param,alpha=0.05,thresh=0.1,se.type="ols") {
     astd <- adjpow(tbd,pow,alpha,type="td",thresh=thresh,se.type=se.type)
     astd2<-adjpow(tbd,pow,alpha,type="td2",thresh=thresh,se.type=se.type)
     cbind(param,anls,astd,astd2)
+}
+
+findparam <- function(fun1,fun2,cf1,cf2,dk,method="BFGS") {
+    mcf <- fun1(cf1,dk)
+    fn <- function(p) {        
+        sum((fun2(p,dk)-mcf)^2)
+    }
+    optim(cf2,fn,method=method,control=list(maxit=1000,reltol=sqrt(.Machine$double.eps)/10))
+}
+
+fp.2step <- function(fun1,fun2,cf1,cf2,dval) {
+    res <- vector("list",length(dval))
+    for(i in 1:length(dval)) {
+        s1 <- findparam(fun1,fun2,cf1,cf2,dval[i],method="Nelder-Mead")
+        s2 <- findparam(fun1,fun2,cf1,s1$par,dval[i],method="BFGS")
+        res[[i]] <- list(s1=s1,s2=s2)
+    }
+    res
 }

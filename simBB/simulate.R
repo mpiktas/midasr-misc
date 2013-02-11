@@ -19,5 +19,10 @@ set.seed(1234)
 if(size) {
     tbd <- simtb(N,param,nealmon,g0,innov.sd=innov.sd,simplify=TRUE)
 }else {
-    ptb <- simtb(N,param,f.theta.kz3,g1,nealmon,g0,innov.sd=innov.sd,simplify=TRUE)
+    dval <- unique(param[,"d"])
+    paropt <- fp.2step(f.theta.kz3,nealmon,g1,g0,dval)
+    h1st <- sapply(paropt,with,s2$par)
+    colnames(h1st) <- as.character(dval)    
+    ptb <- simtb(N,param,f.theta.kz3,g1,nealmon,h1st,innov.sd=innov.sd,simplify=TRUE)
 }
+
