@@ -170,18 +170,20 @@ adjpow <- function(tb,pow,alpha=0.05,type="td",thresh=0.1,se.type="ols") {
     res
 }
 
-sizetable<-function(tbd,param,thresh=0.1,se.type="ols") {
-    snls <- calccol(tbd,type="nls",thresh=thresh,se.type=se.type)
+sizetable<-function(tbd,param,thresh=0.1,se.type="se.ols") {
     std <- calccol(tbd,type="td",thresh=thresh,se.type=se.type)
+    snls <- calccol(tbd,type="nls",thresh=thresh,se.type=se.type)
+    snls2 <- calccol(tbd,type="nls2",thresh=thresh,se.type=se.type)
     std2 <- calccol(tbd,type="td2",thresh=thresh,se.type=se.type)
-    cbind(param,snls,std,std2)
+    cbind(param,snls,snls2,std,std2)
 }
 
-aptable<-function(tbd,pow,param,alpha=0.05,thresh=0.1,se.type="ols") {
-    anls<-adjpow(tbd,pow,alpha,type="nls",thresh=thresh,se.type=se.type)
+aptable<-function(tbd,pow,param,alpha=0.05,thresh=0.1,se.type="se.ols") {
     astd <- adjpow(tbd,pow,alpha,type="td",thresh=thresh,se.type=se.type)
+    anls<-adjpow(tbd,pow,alpha,type="nls",thresh=thresh,se.type=se.type)
+    anls2<-adjpow(tbd,pow,alpha,type="nls2",thresh=thresh,se.type=se.type)
     astd2<-adjpow(tbd,pow,alpha,type="td2",thresh=thresh,se.type=se.type)
-    cbind(param,anls,astd,astd2)
+    cbind(param,anls,anls2,astd,astd2)
 }
 
 findparam <- function(fun1,fun2,cf1,cf2,dk,method="BFGS") {
