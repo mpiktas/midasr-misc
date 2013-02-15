@@ -3,44 +3,361 @@
 \usepackage{bm}
 \usepackage{multirow}
 \usepackage{dcolumn}
-\topmargin=0cm
-\textheight=700pt
-\textwidth=430pt
-\oddsidemargin=0pt
-\headsep=0pt
-\headheight=0pt
+\usepackage{verbatim}
+%\topmargin=0cm
+%\textheight=650pt
+%\headsep=0pt
+%\headheight=0pt
+\textheight650pt
+\textwidth470pt
+
+\marginparwidth0pt
+\marginparsep0pt
+\marginparpush0pt
+\evensidemargin-17pt
+\oddsidemargin0pt
+
+\topmargin0pt
+\headheight0pt
+\headsep0pt
+
+\footskip30pt
+
+\hyphenpenalty=350
+\tolerance=350
+
+\DeclareMathOperator{\argmin}{argmin}
+
 \begin{document}
+\SweaveOpts{concordance=TRUE}
+\section{Interpretation of simulation results}
 
-\section{Size}
+Our DGP is the following
+\begin{align}\label{m:orig}
+    y_t=\sum_{h=0}^{d}x_{tm-h}w_h+\varepsilon_t,
+\end{align}
+where $\varepsilon_t$ is i.i.d white noise with variance $\sigma_{\varepsilon}^2$, and
+\begin{align*}
+    x_{\tau}=x_{\tau-1}+v_{\tau},
+\end{align*}
+where $v_\tau$ is a stationary process with zero mean. 
+
+We propose 4 tests for testing the restriction 
+\begin{align*}
+    w_h=g(h,\gamma)
+\end{align*}
+
+Our goal is to explore the properties of the proposed test statistics. In order to define tests rewrite the  
+\eqref{m:orig} model in the following way:
+\begin{align}\label{m:td}
+    y_t=\sum_{h=0}^{d-1}v_{tm-h}\beta_h+\beta_{d}x_{tm-d}+\varepsilon_t,
+\end{align}
+where
+\begin{align*}
+    \beta_h=\sum_{j=0}^hw_h.
+\end{align*}
+We can also rewrite the model in the following way:
+\begin{align}\label{m:nls}
+    y_{t}=\sum_{h=0}^{d}v_{tm-h}\beta_h+\beta_{d}x_{tm-d-1}+\varepsilon_t
+\end{align}
+Note that coefficient $\beta_d$ is used twice in this expression.
+
+\subsection{NLS tests}
+
+Estimate the \eqref{m:nls} by OLS. Calculate the following residual:
+\begin{align*}
+    \hat{u}_t=y_t-\hat\beta_d^{OLS}x_{tm-d-1}
+\end{align*}
+and estimate $\hat\gamma$ by NLS from the following model:
+\begin{align}\label{m:step2}
+    \hat{u}_t=\sum_{h=0}^{d}v_{tm-h}f(h,\gamma)+\epsilon_t
+\end{align}
+where 
+\begin{align*}
+    f(h,\gamma)=\sum_{j=0}^hg(h,\gamma).
+\end{align*}
+Define 
+\begin{align*}
+    \hat{D}=\frac{\partial \bm{f}}{\partial \gamma}(\hat\gamma)
+\end{align*}
+where $\bm{f}'=(f(1,\gamma),\dots,f{d,\gamma})$. Denote $\hat\beta^{NLS}=\bm{f}(\hat\gamma)$. Then the test for the restriction is
+\begin{align*}
+    T_1:=h'\Sigma^{-1}h,
+\end{align*}
+where
+\begin{align*}
+    h&=\frac{\sqrt{n_d}}{\hat\sigma_\varepsilon}(\hat\beta^{OLS}-\hat\beta^{NLS})\\
+    \Sigma&=\left(\frac{1}{n_d}\bm{V}'\bm{V}\right)^{-1}-\hat{D}\left(\frac{1}{n_d}\hat{D}'\bm{V}'\bm{V}\hat{D}\right)\hat{D}'
+\end{align*}
+Here $n_d$ is the effective number of observations and $\bm{V}$ is the matrix of regressors from the vector form of \eqref{m:nls}.
+
+The second test is the variation of this test. Estimate the following regression by OLS:
+\begin{align*}
+    y_t=\beta_{d}x_{tm-d-1}+\eta_t
+\end{align*}
+Calculate the following residual:
+\begin{align*}
+    \hat{\mathfrak{u}}_{t}=y_t-\hat\beta_dx_{tm-d-1}.
+\end{align*}
+Then proceed with the estimation of $\hat\gamma$ as in previous case, i.e. from the model \eqref{m:step2}, but with $\hat{\mathfrak{u}}_t$ instead of $\hat{u}_t$. The formula for the statistic $T_2$ is then identical to the one for statistic $T_1$, with the exception of $\hat\beta^{OLS}$ which is calculated via OLS from the following model:
+\begin{align*}
+    \hat{\mathfrak{u}}_{t}=\sum_{h=0}^dv_{tm-h}\beta_h+e_t
+\end{align*}
+
+For both the statistics the question is how to estimate the variance $\sigma_\varepsilon^2$ of the $\varepsilon_t$. For statistics $T_1$ and $T_2$ estimate it as the usual error variance from the OLS regression of \eqref{m:nls}. The variance can also be estimated from the NLS regression \eqref{m:step2}. Denote by $T_1'$ and $T_2'$, the variants of statistics $T_1$ and $T_2$ with $\sigma_{\varepsilon}^2$ estimated as normalized residual sum of squares of the NLS regression \eqref{m:step2}.
+
+Under null hypothesis all the statistics have assymptotic $\chi^2_r$ distribution, where $r$ is the number of hyperparameters $\gamma$.
+\section{$T_d$ tests}
+
+The idea behind the tests $T_d$ is to compare the coefficient $\beta_d$ estimated by OLS and NLS. Estimate by OLS the regression \eqref{m:td}. Define the residual
+\begin{align*}
+    \hat{u}_t=y_t-\beta_d^{OLS}x_{tm-d}
+\end{align*}
+Note that compared to NLS test we estimate the same coefficient $\beta_d$, but the regressor now is $x_{tm-d}$ instead of $x_{tm-d-1}$. Then proceed with estimation of $\hat\gamma$ by NLS from the regression
+\begin{align}\label{m:tdstep2}
+    \hat{u}_t=\sum_{h=0}^{d-1}v_{tm-h}f(h,\gamma)+\epsilon_t
+\end{align}
+Note again, that we do not estimate restricted $\beta_d$ in this model compared to model \eqref{m:step2}. On the other hand since we can calculate restrictedcoefficient $\beta_d$ in the following way: $\beta_d^{NLS}=f(d,\hat\gamma)$. Given $\hat\gamma$ we can calculate $\hat D$. Define $\hat{\bm{d}}$ the last row of this matrix, and $\hat{D}_{-d}$ the submatrix of $\hat{D}$ consisting of the first $d-1$ rows of $\hat{D}$. Then the test statistic $T_3$ is defined by
+\begin{align*}
+    T_3=\frac{h^2}{\Sigma},
+\end{align*}
+where
+\begin{align*}
+    h&=\frac{\sqrt{n_d}}{\hat\sigma_{\varepsilon}}(\beta_d^{OLS}-\beta_d^{NLS}),\\
+    \Sigma&=\hat{\bm{d}}\left(\frac{1}{n_d}\hat{D}_{-d}'\bm{V}'\bm{V}\hat{D}_{-d}\right)\hat{\bm{d}}'
+\end{align*}
+The corresponding variant of $T_3$ is defined similar to $T_2$. First estimate $\beta_d^{OLS}$ from the following regression:
+\begin{align*}
+    y_t=\beta_{d}x_{tm-d}+\eta_t
+\end{align*}
+Calculate the following residual:
+\begin{align*}
+    \hat{\mathfrak{u}}_{t}=y_t-\hat\beta_d^{OLS}x_{tm-d}.
+\end{align*}
+and use it to estimate $\hat\gamma$ from the model \eqref{m:tdstep2} with $\hat{u}_t$ changed to $\hat{\mathfrak{u}}_t$. The statistic $T_4$ is defined using the same formula as $T_3$. 
+
+The variants $T_3'$ and $T_4'$ are defined analogously, by using estimate $\hat\sigma^2_{\varepsilon}$ from the NLS regression \eqref{m:tdstep2} instead of OLS regression \eqref{m:td}.
+
+The statistics $T_3,T_3',T_4, T_4'$ all have assymptotic distribution of $\chi^2_1$.
+
+\section{Monte Carlo simulation}
+
+For calculating empirical size, simulate $y_t$ as \eqref{m:orig} with weights
+\begin{align}\label{w:nealmon}
+    g(h,\gamma)=\gamma_1\frac{\exp(\gamma_2h+\gamma_3h^2)}{\sum_{j=0}^d\exp(\gamma_2j+\gamma_3j^2)}
+\end{align}
+with $\gamma=(10,2,-10)$. The white noise $\varepsilon_t$ is taken to be i.i.d random variables with normal distribution with zero mean and $\sigma_{\varepsilon}=7$.
+
+The innovations $v_\tau$ are taken to be AR(1) process with zero mean and $\rho=0.5$ and $\rho=0.9$. The innovations for $v_\tau$ are taken to be ni.i.d normal with unit variance.  The burn-in for AR(1) process was the default setting used by \verb|R| function \verb|arima.sim|. 
+
+The first $10m$ values ($m$ being the frequency ratio) of $x_\tau$ values were used as burn-in, i.e. were discarded, when calculating $y_t$.  
+
+To estimate the empirical size 2000 replications for each combination of sample size, frequency ratio, number of lags and AR(1) parameter were simulated. We used sample sizes 75, 125, 200, 500 and 1000 and frequency ratios 12, 24.  The number of lags were chosen to be 11, 23 for frequency ratio 12 and 11, 23 and 47 for frequency ratio 24.
+
+The optimisation for NLS problem was done using function \verb|optim|
+with settings \verb|method="BFGS"| and
+\verb|control=list(maxit=1000,reltol=sqrt(.Machine$double.eps)/10)|. The
+starting values were chosen to be the $(10,2,-10)$ with random noise added.
+
+To guard against the divergence we discard the replications for which
+\verb|optim| algorithm failed to converge. We note the effective
+number of replications. 
+
+\subsection{Results for empirical sizes}
+The empirical sizes for statistics $T_1,...,T_4$ and $T_1',...,T_4'$
+are shown in tables \ref{tab:size} and \ref{tab:sizenls}. We can
+immediately note that empirical sizes are off for statistics $T_2$ and
+$T_4$. They improve when NLS standard errors are used for statistics
+$T_2'$ and $T_4'$, but they do not converge to nominal sizes. This
+indicates that OLS standard error estimate is wrong for statistics
+$T_2$ and $T_4$. It is interesting to note that $T_4'$ performs better
+when $d$ is larger than $m$, which is opposite to behaviour of
+$T_2'$. This is especialy evident for $\rho=0.9$. But in both cases
+the statistics over-estimate or under-estimate the nominal size. 
+
+If we look at statistics $T_1$ and $T_3$, we see that their
+performance is similar, only $T_3$ performs better on small sample
+sizes. The results for $T_1'$ and $T_3'$ are similar.
+
+\subsection{Analysis of empirical power}
+
+We also calculated the empirical power of the tests. For testing power
+we simulated the model \eqref{m:orig} with weights:
+\begin{align}\label{w:kz3}
+  w_h=g(h,\gamma)=\gamma_1h\exp(\gamma_2h+\gamma_3h^2)
+\end{align}
+and $\gamma_0=(10,-10,-10)$. We then estimated the model using the
+weights \eqref{w:nealmon}. The starting values for optimisation
+procedure were chosen to be 
+\begin{align*}
+  \argmin_{\gamma}\sum_{h=0}^d(g_0(h,\gamma_0)-g_1(h,\gamma))^2
+\end{align*}
+where $g_0$ are weights \eqref{w:kz3} and $g_1$ are the weights
+\eqref{w:nealmon}. For each replication random noise was added to this value.
+
+The simulation results are presented in tables \ref{tab:power} and \ref{tab:powernls}
+
+The weights for $g_0$ and $g_1$ are plotted in figure \ref{fig:one}, the
+respective cumulative weights are plotted in figure
+\ref{fig:two}. Looking at the graphs it is clear why the empirical
+power is low for $d=11$.  For this scenario we can see that $T_3$ and
+$T_4$ outperform $T_1$ and $T_2$. Using NLS standard errors decreases
+power for smaller sample sizes, but in the end the results are
+similar, i.e. $T_3'$ is the best, with $T_4'$ catching up for higher
+sample sizes. 
+
+\subsection{Analysis of size-adjusted empirical power}
+
+We also calculated size-adjusted empirical power for all the
+statistics. We used the replications for empirical size calculations
+to compute the quantiles for empirical size 0.05. The results are
+presented in tables  \ref{tab:adjpower} and \ref{tab:adjpowernls}. The
+results are comparable to empirical power results, with expected drop
+in size-adjusted power for small sample sizes.
+
+
+<<echo=FALSE,include=FALSE,label=bletSweave>>=
+library(midasr)
+library(ggplot2)
+f.theta.kz3 <- function(p, dk) {
+    i <- (1:dk)/100
+    (p[1]*i)*exp(p[2]*i + p[3]*i^2)
+}
+
+fp.2step <- function(fun1,fun2,cf1,cf2,dval) {
+    res <- vector("list",length(dval))
+    for(i in 1:length(dval)) {
+        s1 <- findparam(fun1,fun2,cf1,cf2,dval[i],method="Nelder-Mead")
+        s2 <- findparam(fun1,fun2,cf1,s1$par,dval[i],method="BFGS")
+        res[[i]] <- list(s1=s1,s2=s2)
+    }
+    res
+}
+findparam <- function(fun1,fun2,cf1,cf2,dk,method="BFGS") {
+    mcf <- fun1(cf1,dk)
+    fn <- function(p) {        
+        sum((fun2(p,dk)-mcf)^2)
+    }
+    optim(cf2,fn,method=method,control=list(maxit=1000,reltol=sqrt(.Machine$double.eps)/10))
+}
+g0 <- c(10,2,-10)
+g1 <- c(10,-10,-10)
+paropt <- fp.2step(f.theta.kz3,nealmon,g1,g0,c(12,24,48))
+h1st <- sapply(paropt,with,s2$par)
+df1<-data.frame(Lag=0:11,value=cumsum(f.theta.kz3(g1,12)),Weights="H0",d=11)
+df2<-data.frame(Lag=0:11,value=cumsum(nealmon(h1st[,1],12)),Weights="H1",d=11)
+df3<-data.frame(Lag=0:23,value=cumsum(f.theta.kz3(g1,24)),Weights="H0",d=23)
+df4<-data.frame(Lag=0:23,value=cumsum(nealmon(h1st[,2],24)),Weights="H1",d=23)
+df5<-data.frame(Lag=0:47,value=cumsum(f.theta.kz3(g1,48)),Weights="H0",d=47)
+df6<-data.frame(Lag=0:47,value=cumsum(nealmon(h1st[,3],48)),Weights="H1",d=47)
+dt<-rbind(df1,df2,df3,df4,df5,df6)
+qplot(x=Lag,y=value,data=dt,group=Weights,colour=Weights,geom="line")+facet_wrap(~d,scales="free")
+
+#df1<-data.frame(Lag=0:47,value=f.theta.kz3(g1,48),Weights="H0")
+#df2<-data.frame(Lag=0:11,value=nealmon(h1st[,1],12),Weights="H1, d=11")
+#df3<-data.frame(Lag=0:23,value=nealmon(h1st[,2],24),Weights="H1, d=23")
+#df4<-data.frame(Lag=0:47,value=nealmon(h1st[,3],48),Weights="H1, d=47")
+#dt<-rbind(df1,df2,df3,df4)
+#qplot(x=Lag,y=value,data=dt,group=Weights,colour=Weights,geom="line")
+
+                                        #par(mfrow=c(1,2))
+#plot(f.theta.kz3(g1,12),xlab="Lag",ylab="Weights",main="Weight comparison, d=11")
+#points(nealmon(h1st[,1],12),col=2)
+#plot(f.theta.kz3(g1,24),xlab="Lag",ylab="Weights",main="Weight comparison, d=24")
+#points(nealmon(h1st[,2],24),col=2)
+
+@ 
+<<echo=FALSE,include=FALSE,label=bletSweave2>>=
+df1<-data.frame(Lag=0:11,value=f.theta.kz3(g1,12),Weights="H0",d=11)
+df2<-data.frame(Lag=0:11,value=nealmon(h1st[,1],12),Weights="H1",d=11)
+df3<-data.frame(Lag=0:23,value=f.theta.kz3(g1,24),Weights="H0",d=23)
+df4<-data.frame(Lag=0:23,value=nealmon(h1st[,2],24),Weights="H1",d=23)
+df5<-data.frame(Lag=0:47,value=f.theta.kz3(g1,48),Weights="H0",d=47)
+df6<-data.frame(Lag=0:47,value=nealmon(h1st[,3],48),Weights="H1",d=47)
+dt<-rbind(df1,df2,df3,df4,df5,df6)
+qplot(x=Lag,y=value,data=dt,group=Weights,colour=Weights,geom="line")+facet_wrap(~d,scales="free")
+@
+
+\begin{figure}[t]
+\begin{center}
+<<label=fig1,fig=TRUE,echo=FALSE,height=3,width=11>>=
+<<bletSweave2>>
+@
+\end{center}
+\caption{Weights for different lags}
+\label{fig:one}
+\end{figure}
+
+\begin{figure}[hb]
+\begin{center}
+<<label=fig2,fig=TRUE,echo=FALSE,height=3,width=11>>=
+<<bletSweave>>
+@
+\end{center}
+\caption{Cumulative weights for different lags}
+\label{fig:two}
+\end{figure}
+
+ 
+\section{Appendix}
+
+
 <<echo=FALSE,results=tex>>=
-library(stargazer)
+
 library(xtable)
-tb<-read.csv("size.csv")
-#tb$ar <- round(tb$ar,2)
-#stargazer(tb,summary=FALSE,align=TRUE,digit.separate=0)
-print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0)),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),floating=FALSE)
+tb <- read.csv("size.csv")
+colnames(tb)[1:4] <- c("$n$","$d$","$m$","$\\rho$")
+colnames(tb)[5+0:3*2] <- paste("$T_",1:4,"$",sep="")
+colnames(tb)[6+0:3*2] <- paste("$R_{T_",1:4,"}$",sep="")
+print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0,3,0),label="tab:size",caption="Empirical sizes for OLS standard errors"),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),sanitize.text.function=function(x)x,caption.placement="top")
 @ 
 
-\section{Power}
 <<echo=FALSE,results=tex>>=
 library(stargazer)
 library(xtable)
+tb<-read.csv("size_nls.csv")
+colnames(tb)[1:4] <- c("$n$","$d$","$m$","$\\rho$")
+colnames(tb)[5+0:3*2] <- paste("$T_",1:4,"'$",sep="")
+colnames(tb)[6+0:3*2] <- paste("$R_{T_",1:4,"'}$",sep="")
+print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0,3,0),label="tab:sizenls",caption="Empirical sizes for NLS standard errors"),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),sanitize.text.function=function(x)x,caption.placement="top")
+@
+
+<<echo=FALSE,results=tex>>=
 tb<-read.csv("power.csv")
-#tb$ar <- round(tb$ar,2)
-#stargazer(tb,summary=FALSE,align=TRUE,digit.separate=0)
-print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0)),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),floating=FALSE)
+colnames(tb)[1:4] <- c("$n$","$d$","$m$","$\\rho$")
+colnames(tb)[5+0:3*2] <- paste("$T_",1:4,"$",sep="")
+colnames(tb)[6+0:3*2] <- paste("$R_{T_",1:4,"}$",sep="")
+
+print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0,3,0),label="tab:power",caption="Empirical power for OLS standard errors"),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),sanitize.text.function=function(x)x,caption.placement="top")
 @ 
 
-\newpage
-\section{Adjusted Power}
 <<echo=FALSE,results=tex>>=
-library(stargazer)
-library(xtable)
-tb<-read.csv("adjpower.csv")
-#tb$ar <- round(tb$ar,2)
-#stargazer(tb,summary=FALSE,align=TRUE,digit.separate=0)
-print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0)),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),floating=FALSE)
+tb<-read.csv("power_nls.csv")
+colnames(tb)[1:4] <- c("$n$","$d$","$m$","$\\rho$")
+colnames(tb)[5+0:3*2] <- paste("$T_",1:4,"'$",sep="")
+colnames(tb)[6+0:3*2] <- paste("$R_{T_",1:4,"'}$",sep="")
+
+print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0,3,0),label="tab:powernls", caption="Empirical power for NLS standard errors"),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),sanitize.text.function=function(x)x,caption.placement="top")
 @ 
+
+<<echo=FALSE,results=tex>>=
+tb<-read.csv("adjpower.csv")
+colnames(tb)[1:4] <- c("$n$","$d$","$m$","$\\rho$")
+colnames(tb)[5+0:3*2] <- paste("$T_",1:4,"$",sep="")
+colnames(tb)[6+0:3*2] <- paste("$R_{T_",1:4,"}$",sep="")
+
+print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0,3,0),label="tab:adjpower",caption="Adjusted empirical power for OLS standard errors"),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),sanitize.text.function=function(x)x,caption.placement="top")
+@
+
+<<echo=FALSE,results=tex>>=
+tb<-read.csv("adjpower_nls.csv")
+colnames(tb)[1:4] <- c("$n$","$d$","$m$","$\\rho$")
+colnames(tb)[5+0:3*2] <- paste("$T_",1:4,"'$",sep="")
+colnames(tb)[6+0:3*2] <- paste("$R_{T_",1:4,"'}$",sep="")
+print(xtable(tb,digits=c(0,0,0,0,1,3,0,3,0,3,0,3,0),label="tab:adjpowernls",caption="Adjusted empirical power for NLS standard errors"),hline.after=c(-1,0,seq(5,45,by=5),nrow(tb)),sanitize.text.function=function(x)x,caption.placement="top")
+@ 
+\end{document}
+
 \newpage
 \section{Size with different starting values and gradient threshold 15}
 <<echo=FALSE,results=tex>>=
