@@ -1,5 +1,5 @@
 hAhrfix.test <- function(x,PHI=vcovHAC(x$unrestricted,sandwich=FALSE)) {
-    prep <- prep_hAh(x)
+    prep <- midasr:::prep_hAh(x)
     
     unrestricted <- x$unrestricted
 

@@ -1,5 +1,5 @@
 library(midasr)
-
+source("hahr.R")
 ##The parameter function
 theta.h0 <- function(p, dk) {
   i <- (1:dk-1)
@@ -25,14 +25,14 @@ for(d in 1:3){
     y <- midas.sim(freqs[d],theta0,x,1)
     x <- window(x,start=start(y))
     mr <- midas_r(y~fmls(x,4*12-1,12,theta.h0)-1,data.frame(y=y),data.frame(x=x),start=list(x=c(-0.1,0.1,-0.1,-0.001)),dk=4*12)
-    vals[i, d] <- hAhr.test(mr)$statistic
+    vals[i, d] <- hAhrfix.test(mr)$statistic
   }
 }
-
-plot(seq(0, 100, 0.1), 
-     dchisq(seq(0, 100, 0.1), 44), 
-     xlab = "red - 300 obs., magenta - 1000, blue - 2000", 
-     ylab= "")
-lines(density(vals[,1]), col = "red")
-lines(density(vals[,2]), col = "magenta")
-lines(density(vals[,3]), col = "blue")
+save(vals,file="valsfix.RData")
+#plot(seq(0, 100, 0.1), 
+#     dchisq(seq(0, 100, 0.1), 44), 
+#     xlab = "red - 300 obs., magenta - 1000, blue - 2000", 
+#3     ylab= "")
+#lines(density(vals[,1]), col = "red")
+#lines(density(vals[,2]), col = "magenta")
+#lines(density(vals[,3]), col = "blue")
