@@ -1,24 +1,35 @@
 library(midasr)
+library(foreach)
+source("10func.R")
 source("hahr.R")
 ##The parameter function
-theta.h0 <- function(p, dk) {
-  i <- (1:dk-1)
-  (p[1] + p[2]*i)*exp(p[3]*i + p[4]*i^2)
+
+h01 <- c(10,0,0)
+h02 <- c(10,-5,-5)
+h03 <- c(10,1,1)
+h04 <- c(10,-0.5,0.04)
+h05 <- c(10,0.5,-0.04)
+h06 <- c(10,0.005,0.02)
+##Constant to multiply to adjust to our nealmon function
+const <- c(1,100,100^2)
+HH<-rbind(h01,h02,h03,h04,h05,h06)
+
+
+xino <- function(n)rnorm(n)
+
+
+rr1<-foreach(i=4:6,.combine="c",.errorhandling="pass") %dopar% {
+   ii<-foreach(n=c(300,1000,2000),.combine="c",.errorhandling="pass") %do% {
+     list(genhahr(1,n,HH[i,]*const,ar=0.6,xino,xino))
+   }
+   list(ii)
 }
 
-##Generate coefficients
-theta0 <- theta.h0(c(-0.1,0.1,-0.1,-0.001),4*12)
-
-##The gradient function
-grad.h0<-function(p, dk) {
-  i <- (1:dk-1)
-  a <- exp(p[3]*i + p[4]*i^2)
-  cbind(a, a*i, a*i*(p[1]+p[2]*i), a*i^2*(p[1]+p[2]*i))
-}
-
+if(FALSE) {
 n <- 500
 vals <- matrix(NA, nrow = n, ncol = 3)
 freqs <- c(300, 1000, 2000)
+
 for(d in 1:3){
   for(i in 1:nrow(vals)){
     x <- simplearma.sim(list(ar=0.6),2500 * 12,1,12)
@@ -29,6 +40,9 @@ for(d in 1:3){
   }
 }
 save(vals,file="valsfix.RData")
+}
+
+
 #plot(seq(0, 100, 0.1), 
 #     dchisq(seq(0, 100, 0.1), 44), 
 #     xlab = "red - 300 obs., magenta - 1000, blue - 2000", 
