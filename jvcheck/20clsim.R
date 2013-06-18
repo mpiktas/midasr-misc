@@ -35,10 +35,10 @@ oneh<-function(l) {
                  l$h1$wfun,l$h1$wpar,
                  l$dk,xino,xino,                
                  m=l$m)
-  #  save(gen,file=paste("results/hhp0617/res",l$i,l$j,l$n,l$cno,l$dk,"1000.RData",sep="-"))
+    save(gen,file=paste("results/hhp0617/res",l$i,l$n,l$cno,l$dk,l$m,"1000.RData",sep="-"))
     list(gen=gen,l=l)               
 }
 
 ##Run comparison between hAhr and hAhr.fixed
-tm<-snow.time(rr1<-clusterApplyLB(cl,hhp.100,oneh.al))
+tm<-snow.time(rr1<-clusterApplyLB(cl,hhp.100,oneh))
 save(rr1,tm,file="hhp0617.RData")
