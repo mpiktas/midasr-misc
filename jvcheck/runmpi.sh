@@ -1,6 +1,6 @@
 #!/bin/sh
 #SBATCH -p long
-#SBATCH -n21 
+#SBATCH -n51 
 R_LIBS=/scratch/lustre/zemlys/lib64/R/library
 export R_LIBS
 
